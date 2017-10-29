@@ -4,10 +4,18 @@ var gridPos = {
   y: undefined
 };
 
+var mousePos = {
+  x: undefined,
+  y: undefined
+};
 
-var clickAction = {
+var click = {
   state: false,
   action: false,
+  gridstartx: undefined,
+  gridstarty: undefined,
+  gridendx: undefined,
+  gridendy: undefined,
   startx: undefined,
   starty: undefined,
   endx: undefined,
@@ -17,200 +25,257 @@ var clickAction = {
 canvas.width = window.innerWidth - 2;
 canvas.height = window.innerHeight - 2;
 canvas.onmousemove = function(event) {
-    gridPos.x = Math.floor(event.x / blocksize);
-    gridPos.y = Math.floor(event.y / blocksize);
+  gridPos.x = Math.floor((event.x - menuOffset) / blocksize);
+  gridPos.y = Math.floor(event.y / blocksize);
+  mousePos.x = event.x;
+  mousePos.y = event.y;
 };
 
 canvas.onmousedown = function(event) {
-  clickAction.state = true;
-  clickAction.action = false;
-  clickAction.startx = gridPos.x;
-  clickAction.starty = gridPos.x;
+  click.state = true;
+  click.action = false;
+  click.gridstartx = gridPos.x;
+  click.gridstarty = gridPos.x;
+  click.startx = event.x;
+  click.starty = event.y;
 };
 canvas.onmouseup = function(event) {
-  clickAction.state = false;
-  clickAction.endx = gridPos.x;
-  clickAction.endy = gridPos.x;
-  if ( clickAction.endy - clickAction.starty == 0 && clickAction.endx - clickAction.startx == 0){
-    clickAction.action = true;
-  }
-  console.log(clickAction);
-};
+  click.state = false;
+  click.gridendx = gridPos.x;
+  click.gridendy = gridPos.x;
+  click.endx = event.x;
+  click.endy = event.y;
+  if ( click.gridendy - click.gridstarty == 0
+    && click.gridendx - click.gridstartx == 0) {
+      click.action = true;
+    }
+
+    if(click.endx >= 20 && click.endx <= 150
+      && click.endy >= 20 && click.endy <= 100
+      && click.startx >= 20 && click.startx <= 150
+      && click.starty >= 20 && click.starty <= 100
+    ) {
+      click.action = false;
+      gameState = !gameState;
+    }
+    console.log(gameState);
+  };
 
 
 
-// Initialize variables
-var maxWidth = window.screen.availWidth;
-var maxHeight = window.screen.availHeight;
-var c = canvas.getContext('2d');
-var blocksize = 40;
-var notAlive = '#169185';
-var hover_notAlive = '#9FB8A8'
-var alive = '#F3F5F1';
+  // Initialize variables
+  var maxWidth = window.screen.availWidth;
+  var maxHeight = window.screen.availHeight;
+  var c = canvas.getContext('2d');
+  var blocksize = 30;
+  var gameState = false;
+  var menuOffset = 170;
+  var notAlive = '#169185';
+  var hover_notAlive = '#9FB8A8'
+  var alive = '#F3F5F1';
 
 
-// Cell object
-function Cell(x, y) {
-  this.x = x;
-  this.y = y;
-  this.alive = false;
+  // Cell object
+  function Cell(x, y) {
+    this.x = x;
+    this.y = y;
+    this.alive = false;
+    this.nextalive = false;
 
-  /* Draw function */
-  this.draw = function() {
-    //c.fillStyle = colorArray[Math.floor(Math.random() * colorArray.length)]
+    /* Draw function */
+    this.draw = function() {
+      //c.fillStyle = colorArray[Math.floor(Math.random() * colorArray.length)]
 
-    //Cell appearance while mouse hovering
-    if(gridPos.x*blocksize == this.x && gridPos.y*blocksize == this.y){
+      //Cell appearance while mouse hovering
+      if(gridPos.x*blocksize == this.x - menuOffset && gridPos.y*blocksize == this.y){
 
-      /*Flip alive status when clicked*/
-      if(clickAction.action){
-        clickAction.action = false;
-        this.alive = !this.alive;
+        /*Flip alive status when clicked*/
+        if(click.action){
+          click.action = false;
+          this.alive = !this.alive;
+        }
+
+        if(click.state){
+          this.cellgap = 4;
+        }
+        else{
+          this.cellgap = 0;
+        }
+        if(this.alive){
+          c.fillStyle = alive;
+        }
+        else{
+          c.fillStyle = notAlive;
+        }
       }
-      
-      if(clickAction.state){
-        this.cellgap = 4;
-      }
+      // Cell appearance while mouse not hovering
       else{
-        this.cellgap = 0;
+        this.cellgap = 2;
+        if(this.alive){
+          c.fillStyle = alive;
+        }
+        else{
+          c.fillStyle = notAlive;
+        }
       }
-      if(this.alive){
-        c.fillStyle = alive;
-      }
-      else{
-        c.fillStyle = notAlive;
-      }
-    }
-    // Cell appearance while mouse not hovering
-    else{
-      this.cellgap = 2;
-      if(this.alive){
-        c.fillStyle = alive;
-      }
-      else{
-        c.fillStyle = notAlive;
-      }
-    }
 
-    //draw the cell
-    this.cellsize = blocksize - 2*this.cellgap;
-    c.fillRect(x+this.cellgap, y+this.cellgap, this.cellsize, this.cellsize);
-  }
-}
-
-// Grid
-function Grid(width, height) {
-  this.width = Math.floor(width / blocksize);
-  this.height = Math.floor(height / blocksize);
-  this.grid = new Array(this.width);
-
-  for(var x = 0; x < this.width; x++){
-    this.grid[x] = new Array(this.height);
-  }
-
-  /* Setup board */
-  this.setup = function() { 
-    for (var x = 0; x < this.width; x++) {
-      for(var y = 0; y < this.height; y++) {
-        this.grid[x][y] = new Cell(x*blocksize, y*blocksize);
-      }
-    }
-  }
-  /* Draw the board */
-  this.draw = function() {
-    for (var x = 0; x < this.width; x++) {
-      for(var y = 0; y < this.height; y++) {
-        this.grid[x][y].draw();
-      }
+      //draw the cell
+      this.cellsize = blocksize - 2*this.cellgap;
+      c.fillRect(x+this.cellgap, y+this.cellgap, this.cellsize, this.cellsize);
     }
   }
 
-  /* Update next Iteration of board */
-  this.update = function() {
-    var currrent_cell;
-    var cellNeighbors;
-    for (var x = 0; x < this.width; x++) {
-      for(var y = 0; y < this.height; y++) {
-        currrent_cell = this.grid[x][y];
-        cellNeighbors = this.getNeighbor(x,y);
+  // Grid
+  function Grid(width, height) {
+    this.width = Math.floor(width / blocksize);
+    this.height = Math.floor(height / blocksize);
+    this.grid = new Array(this.width);
+
+    for(var x = 0; x < this.width; x++){
+      this.grid[x] = new Array(this.height);
+    }
+
+    /* Setup board */
+    this.setup = function() {
+      for (var x = 0; x < this.width; x++) {
+        for(var y = 0; y < this.height; y++) {
+          this.grid[x][y] = new Cell(x*blocksize+menuOffset, y*blocksize);
+        }
       }
     }
-  }
+    /* Draw the board */
+    this.draw = function() {
+      for (var x = 0; x < this.width; x++) {
+        for(var y = 0; y < this.height; y++) {
+          this.grid[x][y].draw();
+        }
+      }
+      // Draw menu
+      c.fillStyle = '#FFFFFF';
+      c.fillRect(10, 10, 152, canvas.height-20);
 
-  /* Get Count of Neighbors alive */
-  this.getNeighbor = function (x,y){
-    var count = 0;
-    if ( x - 1 >= 0){ // LEFT
-      if(this.grid[x - 1][y].alive){
-        count++;
+      // Pick color for start button (based on game state)
+      if(gameState) {
+        c.fillStyle = '#000000';
+      }
+      else {
+        c.fillStyle = '#1D797D';
+      }
+      // Draw and animate buttons
+      if(mousePos.x >= 20 && mousePos.x <= 150
+        && mousePos.y >= 20 && mousePos.y <= 100) {
+          // Animate for mouse hovering
+          c.fillRect(15, 15, 140, 90);
+        }
+        else {
+          c.fillRect(20, 20, 130, 80);
+        }
+      }
+
+      /* Update next Iteration of board */
+      this.update = function() {
+        var current_cell;
+        var cellNeighbors;
+        for (var x = 0; x < this.width; x++) {
+          for(var y = 0; y < this.height; y++) {
+            current_cell = this.grid[x][y];
+            cellNeighbors = this.getNeighbor(x,y);
+
+            // determine cell alive status
+            if(current_cell.alive && cellNeighbors < 2) {
+              current_cell.nextalive = false;
+            }
+            else if(current_cell.alive && cellNeighbors < 4) {
+              current_cell.nextalive = true;
+            }
+            else if(current_cell.alive && cellNeighbors >= 4) {
+              current_cell.nextalive = false;
+            }
+            else if(!current_cell.alive && cellNeighbors == 3) {
+              current_cell.nextalive = alive;
+            }
+          }
+        }
+
+        // update cell life status
+        for (var x = 0; x < this.width; x++) {
+          for(var y = 0; y < this.height; y++) {
+            this.grid[x][y].alive = this.grid[x][y].nextalive;
+          }
+        }
+      }
+
+      /* Get Count of Neighbors alive */
+      this.getNeighbor = function (x,y){
+        var count = 0;
+        if ( x - 1 >= 0){ // LEFT
+          if(this.grid[x - 1][y].alive){
+            count++;
+          }
+        }
+        if ( x - 1 >= 0 && y - 1 >= 0){ // UPPER LEFT
+          if(this.grid[x - 1][y - 1].alive){
+            count++;
+          }
+        }
+        if ( y - 1 >= 0){ // TOP
+          if(this.grid[x][y - 1].alive){
+            count++;
+          }
+        }
+        if ( x + 1 < this.width && y - 1 >= 0){ // UPPER RIGHT
+          if(this.grid[x + 1][y - 1].alive){
+            count++;
+          }
+        }
+        if ( x + 1 < this.width){ // RIGHT
+          if(this.grid[x + 1][y].alive){
+            count++;
+          }
+        }
+        if ( x + 1 < this.width && y + 1 < this.height){ // LOWER RIGHT
+          if(this.grid[x + 1][y + 1].alive){
+            count++;
+          }
+        }
+        if ( y + 1 < this.height){ //BOTTOM
+          if(this.grid[x][y + 1].alive){
+            count++;
+          }
+        }
+        if ( x - 1 >= 0 && y + 1 < this.height){ // LOWER LEFT
+          if(this.grid[x - 1][y + 1].alive){
+            count++;
+          }
+        }
+        return count;
       }
     }
-    if ( x - 1 >= 0 && y - 1 >= 0){ // UPPER LEFT
-      if(this.grid[x - 1][y - 1].alive){
-        count++;
+
+
+    var board = new Grid(maxWidth, maxHeight);
+    board.setup();
+    board.draw();
+    var lastupdate = Date.now();
+
+    function animate(){
+      requestAnimationFrame(animate)
+      c.clearRect(0,0,innerWidth,innerHeight);
+      var currentTime = Date.now()
+      //check if 250 MS passed, update board
+      if ( gameState && currentTime - lastupdate > 250){
+        board.update();
+        lastupdate = currentTime;
       }
+      board.draw();
+      //console.log(board.getNeighbor(1,1));
     }
-    if ( y - 1 >= 0){ // TOP
-      if(this.grid[x][y - 1].alive){
-        count++;
-      }
-    }
-    if ( x + 1 < this.width && y - 1 >= 0){ // UPPER RIGHT
-      if(this.grid[x + 1][y - 1].alive){
-        count++;
-      }
-    }
-    if ( x + 1 < this.width){ // RIGHT
-      if(this.grid[x + 1][y].alive){
-        count++;
-      }
-    }
-    if ( x + 1 < this.width && y + 1 < this.height){ // LOWER RIGHT
-      if(this.grid[x + 1][y + 1].alive){
-        count++;
-      }
-    }
-    if ( y + 1 < this.height){ //BOTTOM
-      if(this.grid[x][y + 1].alive){
-        count++;
-      }
-    }
-    if ( x - 1 >= 0 && y + 1 < this.height){ // LOWER LEFT
-      if(this.grid[x - 1][y + 1].alive){
-        count++;
-      }
-    }
-    return count;    
-  }
-}
 
+    animate();
 
-var board = new Grid(maxWidth, maxHeight);
-board.setup();
-board.draw();
-var lastupdate = Date.now();
-
-function animate(){
-  requestAnimationFrame(animate)
-  c.clearRect(0,0,innerWidth,innerHeight);
-  var currentTime = Date.now()
-  //check if 250 MS passed, update board
-  if ( currentTime - lastupdate > 250){
-    board.update();
-    lastupdate = currentTime;
-  }
-  board.draw();
-  //console.log(board.getNeighbor(1,1));
-}
-
-animate();
-
-//Listeners
-window.addEventListener('resize', function() {
-  canvas.width = window.innerWidth - 2;
-  canvas.height = window.innerHeight - 2;
-  board.draw();
-});
-
-
-
+    //Listeners
+    window.addEventListener('resize', function() {
+      canvas.width = window.innerWidth - 2;
+      canvas.height = window.innerHeight - 2;
+      board.draw();
+    });
