@@ -70,9 +70,9 @@ canvas.onmouseup = function(event) {
   var blocksize = 30;
   var gameState = false;
   var menuOffset = 170;
-  var notAlive = '#169185';
-  var hover_notAlive = '#9FB8A8'
-  var alive = '#F3F5F1';
+  var notAlive = '#ABB7D4';
+  var hover_notAlive = '#7FADA9'
+  var alive = '#4285A8';
 
 
   // Cell object
@@ -151,24 +151,29 @@ canvas.onmouseup = function(event) {
         }
       }
       // Draw menu
-      c.fillStyle = '#FFFFFF';
+      c.fillStyle = '#1C1D21';
       c.fillRect(10, 10, 152, canvas.height-20);
 
       // Pick color for start button (based on game state)
       if(gameState) {
-        c.fillStyle = '#000000';
+        c.fillStyle = '#92CDCF';
       }
       else {
-        c.fillStyle = '#1D797D';
+        c.fillStyle = '#445878';
+        c.font = 'bold 30pt Calibri';
       }
       // Draw and animate buttons
       if(mousePos.x >= 20 && mousePos.x <= 150
         && mousePos.y >= 20 && mousePos.y <= 100) {
           // Animate for mouse hovering
           c.fillRect(15, 15, 140, 90);
+          c.fillStyle = '#FFFFFF';
+          c.fillText('Start', 25, 70);
         }
         else {
           c.fillRect(20, 20, 130, 80);
+          c.fillStyle = '#FFFFFF';
+          c.fillText('Start', 25, 70);
         }
       }
 
