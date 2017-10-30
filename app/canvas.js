@@ -187,19 +187,25 @@ canvas.onmouseup = function(event) {
             cellNeighbors = this.getNeighbor(x,y);
 
             // determine cell alive status
-            if(current_cell.alive && cellNeighbors < 2) {
-              current_cell.nextalive = false;
+            if(gameState){
+
+              if(current_cell.alive && cellNeighbors < 2) {
+                current_cell.nextalive = false;
+              }
+              else if(current_cell.alive
+                && (cellNeighbors == 2 || cellNeighbors == 3)) {
+                  current_cell.nextalive = true;
+                }
+                else if(current_cell.alive && cellNeighbors >= 4) {
+                  current_cell.nextalive = false;
+                }
+                else if(!current_cell.alive
+                  && (cellNeighbors == 3)) {
+                    current_cell.nextalive = alive;
+                  }
             }
-            else if(current_cell.alive
-              && (cellNeighbors == 2 || cellNeighbors == 3)) {
-              current_cell.nextalive = true;
-            }
-            else if(current_cell.alive && cellNeighbors >= 4) {
-              current_cell.nextalive = false;
-            }
-            else if(!current_cell.alive
-              && (cellNeighbors == 3)) {
-              current_cell.nextalive = alive;
+            else{
+              current_cell.nextalive = current_cell.alive;
             }
           }
         }
@@ -270,7 +276,7 @@ canvas.onmouseup = function(event) {
       c.clearRect(0,0,innerWidth,innerHeight);
       var currentTime = Date.now()
       //check if 250 MS passed, update board
-      if ( gameState && currentTime - lastupdate > 250){
+      if (currentTime - lastupdate > 250){
         board.update();
         lastupdate = currentTime;
       }
