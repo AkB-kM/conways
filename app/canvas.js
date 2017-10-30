@@ -34,15 +34,15 @@ canvas.onmousemove = function(event) {
 canvas.onmousedown = function(event) {
   click.state = true;
   click.action = false;
-  click.gridstartx = gridPos.x;
-  click.gridstarty = gridPos.x;
+  click.gridstartx = Math.floor((event.x - menuOffset) / blocksize);
+  click.gridstarty = Math.floor(event.y / blocksize);
   click.startx = event.x;
   click.starty = event.y;
 };
 canvas.onmouseup = function(event) {
   click.state = false;
-  click.gridendx = gridPos.x;
-  click.gridendy = gridPos.x;
+  click.gridendx = Math.floor((event.x - menuOffset) / blocksize);
+  click.gridendy = Math.floor(event.y / blocksize);
   click.endx = event.x;
   click.endy = event.y;
   if ( click.gridendy - click.gridstarty == 0
