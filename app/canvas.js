@@ -87,6 +87,7 @@ canvas.onmouseup = function(event) {
       //c.fillStyle = colorArray[Math.floor(Math.random() * colorArray.length)]
 
       //Cell appearance while mouse hovering
+
       if(gridPos.x*blocksize == this.x - menuOffset && gridPos.y*blocksize == this.y){
 
         /*Flip alive status when clicked*/
@@ -95,11 +96,11 @@ canvas.onmouseup = function(event) {
           this.alive = !this.alive;
         }
 
-        if(click.state){
-          this.cellgap = 2;
+        if(!click.state){
+          this.cellgap = 0;
         }
         else{
-          this.cellgap = 0;
+          this.cellgap = 1;
         }
         if(this.alive){
           c.fillStyle = alive;
@@ -116,6 +117,13 @@ canvas.onmouseup = function(event) {
         }
         else{
           c.fillStyle = notAlive;
+        }
+      }
+
+      // Cell appearance that is clicked but not yet selected
+      if(click.gridstartx*blocksize == this.x - menuOffset && click.gridstarty*blocksize == this.y){
+        if(click.state){
+          this.cellgap = 4;
         }
       }
 
