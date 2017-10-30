@@ -67,7 +67,7 @@ canvas.onmouseup = function(event) {
   var maxWidth = window.screen.availWidth;
   var maxHeight = window.screen.availHeight;
   var c = canvas.getContext('2d');
-  var blocksize = 30;
+  var blocksize = 15;
   var gameState = false;
   var menuOffset = 170;
   var notAlive = '#ABB7D4';
@@ -96,7 +96,7 @@ canvas.onmouseup = function(event) {
         }
 
         if(click.state){
-          this.cellgap = 4;
+          this.cellgap = 2;
         }
         else{
           this.cellgap = 0;
@@ -110,7 +110,7 @@ canvas.onmouseup = function(event) {
       }
       // Cell appearance while mouse not hovering
       else{
-        this.cellgap = 2;
+        this.cellgap = 1;
         if(this.alive){
           c.fillStyle = alive;
         }
@@ -190,13 +190,15 @@ canvas.onmouseup = function(event) {
             if(current_cell.alive && cellNeighbors < 2) {
               current_cell.nextalive = false;
             }
-            else if(current_cell.alive && cellNeighbors < 4) {
+            else if(current_cell.alive
+              && (cellNeighbors == 2 || cellNeighbors == 3)) {
               current_cell.nextalive = true;
             }
             else if(current_cell.alive && cellNeighbors >= 4) {
               current_cell.nextalive = false;
             }
-            else if(!current_cell.alive && cellNeighbors == 3) {
+            else if(!current_cell.alive
+              && (cellNeighbors == 3)) {
               current_cell.nextalive = alive;
             }
           }
